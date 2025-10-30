@@ -1,2 +1,5 @@
 /qdrant_storage
 /.vscode
+__pycache__
+.env
+**.csv
