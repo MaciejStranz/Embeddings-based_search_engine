@@ -33,6 +33,7 @@ def index_corpus(client, model, df_corpus, batch_size: int = 512):
     texts = df_corpus["text"].astype(str).tolist()
 
     for i in range(0, len(texts), batch_size):
+        # end = min(len(texts), i + batch_size) probably need to secure index by this
         chunk_ids = ids[i : i + batch_size]
         chunk_txt = texts[i : i + batch_size]
         vecs = model.encode(chunk_txt, normalize_embeddings=True)

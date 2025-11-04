@@ -1,8 +1,8 @@
 from fastapi import FastAPI, Request, HTTPException
 from contextlib import asynccontextmanager
-from .search_engine import init_qdrant_client, init_model, initialize_collection, search, insert_data_from_csv
+from .search_engine import init_qdrant_client, init_model, initialize_collection, search, insert_data_from_csv, insert_doc
 from .config import settings
-from .schemas import SearchResponse, SearchRequest, SearchHit
+from .schemas import SearchResponse, SearchRequest, SearchHit, AddDocRequest, AddDocResponse
 
 
 @asynccontextmanager
@@ -49,15 +49,43 @@ def search_endpoint(req: SearchRequest, request: Request):
 
     qdrant = request.app.state.qdrant
     model = request.app.state.model
+    collection_name = req.collection or settings.COLLECTION_NAME
+
 
     results = search(
         client = qdrant,
         query = req.query,
         model = model,
         top_k=req.top_k,
-        collection_name = settings.COLLECTION_NAME
+        collection_name = collection_name
     )
 
     hits = [SearchHit(id=r["id"], score=r["score"], payload=r["payload"]) for r in results]
     return SearchResponse(query=req.query, results=hits)
+
+@app.post("/insert_doc", response_model=AddDocResponse)
+def add_document(req: AddDocRequest, request: Request):
+    if not req.text or not req.text.strip():
+        raise HTTPException(status_code=400, detail="Empty text")
+
+    qdrant = request.app.state.qdrant
+    model = request.app.state.model
+    collection_name = req.collection or settings.COLLECTION_NAME
+
+    try:
+        new_id = insert_doc(
+            client=qdrant,
+            model=model,
+            text=req.text.strip(),
+            collection_name=collection_name
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to insert document: {e}")
+
+    return AddDocResponse(
+        id=new_id,
+        collection=collection_name,
+        payload={"review": req.text.strip()},
+    )
+
 

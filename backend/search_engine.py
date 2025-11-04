@@ -6,6 +6,7 @@ import pandas as pd
 from sentence_transformers import SentenceTransformer
 from .config import settings
 import uuid
+from typing import Optional, Union
 
 
 def init_qdrant_client() -> QdrantClient:
@@ -70,6 +71,27 @@ def search(client: QdrantClient, query: str, model: SentenceTransformer, top_k: 
 #                 payload = {"review": text}
 #         )
 #     )
+
+    
+def insert_doc(client: QdrantClient, model: SentenceTransformer, text: str, collection_name: str = settings.COLLECTION_NAME):
+    point_id = str(uuid.uuid4())
+    embedding = model.encode(text, normalize_embeddings=True)
+
+    client.upsert(
+        collection_name=collection_name,
+        points=[
+        PointStruct(
+            id=point_id,
+            vector=embedding.tolist(),
+            payload={"review": text},
+        )
+        ],
+        wait=True,
+    )
+    return point_id
+    
+
+
 
 
 
