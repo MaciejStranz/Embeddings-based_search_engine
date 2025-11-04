@@ -24,7 +24,7 @@ from .cosqa_adapter import (
     build_query_list,
 )
 
-COSQA_COLLECTION = "cosqa"
+COSQA_COLLECTION = "cosqa_final_finetune"
 
 def _collection_compatible(client: QdrantClient, name: str, dim_expected: int, dist_expected: str) -> bool:
     if not client.collection_exists(name):
@@ -41,10 +41,10 @@ def _collection_compatible(client: QdrantClient, name: str, dim_expected: int, d
 
 def _collection_ready(client: QdrantClient, name: str, expected_count: int) -> bool:
     """
-    Kolekcja uznana za gotową, jeśli:
-      - istnieje,
-      - ma odpowiedni rozmiar i metrykę,
-      - ma co najmniej expected_count punktów.
+    Uznajemy kolekcję za gotową, jeśli:
+    - istnieje,
+    - ma poprawny wymiar i metrykę,
+    - ma co najmniej expected_count punktów (dokładne liczenie).
     """
     if not _collection_compatible(client, name, settings.VECTOR_SIZE, settings.DISTANCE):
         return False
@@ -54,10 +54,10 @@ def _collection_ready(client: QdrantClient, name: str, expected_count: int) -> b
     except Exception:
         return False
 
-def ensure_cosqa_collection(client: QdrantClient):
-    initialize_collection(client, collection_name=COSQA_COLLECTION)
+def ensure_cosqa_collection(client: QdrantClient, col_name):
+    initialize_collection(client, collection_name=col_name)
 
-def index_corpus(client, model, df_corpus, batch_size: int = 256):
+def index_corpus(client, model, df_corpus, col_name,  batch_size: int = 256):
     ids = df_corpus["doc_id"].astype(str).tolist()
     texts = df_corpus["text"].astype(str).tolist()
 
@@ -96,10 +96,10 @@ def index_corpus(client, model, df_corpus, batch_size: int = 256):
                 )
             )
 
-        client.upsert(collection_name=COSQA_COLLECTION, points=points, wait=True)
+        client.upsert(collection_name=col_name, points=points, wait=True)
 
 
-def retrieve_topk(client, model, queries, top_k: int = 10) -> Dict[str, List[str]]:
+def retrieve_topk(client, model, queries, col_name, top_k: int = 10) -> Dict[str, List[str]]:
     out = {}
     for qid, qtext in queries:
         hits = search(
@@ -107,7 +107,7 @@ def retrieve_topk(client, model, queries, top_k: int = 10) -> Dict[str, List[str
             query=qtext,
             model=model,
             top_k=top_k,
-            collection_name=COSQA_COLLECTION,
+            collection_name=col_name,
         )
         # bierzemy doc_id z payloadu; jeśli z jakiegoś powodu go braknie – fallback do id
         out[qid] = [
@@ -120,12 +120,15 @@ def retrieve_topk(client, model, queries, top_k: int = 10) -> Dict[str, List[str
 
 def run_evaluation(
     split: str = "test",
+    col_name: str = "cosqa",
+    model_name: str = settings.MODEL_NAME, 
     limit_queries: Optional[int] = None,
     top_k: int = 10,
 ):
 
     client: QdrantClient = init_qdrant_client()
-    model: SentenceTransformer = init_model()
+    model: SentenceTransformer = SentenceTransformer(model_name)
+    print(model)
 
     df_corpus = load_corpus()                 # kolumny: doc_id, text
     df_queries = load_queries()               # kolumny: qid, query
@@ -142,17 +145,17 @@ def run_evaluation(
     # index_corpus(client, model, df_corpus, batch_size=512)
 
     expected_points = len(df_corpus)
-    if _collection_ready(client, COSQA_COLLECTION, expected_points):
+    if _collection_ready(client, col_name, expected_points):
         # już gotowe – nic nie robimy
-        print(f"Collection {COSQA_COLLECTION} ready")
+        print(f"Collection {col_name} ready")
         pass
     else:
         # utwórz/odtwórz zgodną kolekcję i zaindeksuj
-        initialize_collection(client, collection_name=COSQA_COLLECTION)
-        index_corpus(client, model, df_corpus, batch_size=512)
+        initialize_collection(client, collection_name=col_name)
+        index_corpus(client, model, df_corpus, col_name, batch_size=512)
 
     # 3) Retrieval
-    retrieved = retrieve_topk(client, model, queries, top_k=top_k)
+    retrieved = retrieve_topk(client, model, queries, col_name, top_k=top_k)
 
     # 4) Metryki
     report = aggregate_at_k(retrieved, qrels, k=top_k)
