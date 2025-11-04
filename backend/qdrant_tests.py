@@ -10,5 +10,5 @@ client = init_qdrant_client()
 if(initialize_collection(client, col_name)):
     insert_data_from_csv(client, model, col_name)
 
-res = search(client, q, model, col_name)
+res = search(client, q, model, 5, col_name)
 print(res)

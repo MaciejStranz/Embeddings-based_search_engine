@@ -27,7 +27,7 @@ def initialize_collection(client: QdrantClient, collection_name: str = settings.
     
 def insert_data_from_csv(client: QdrantClient, model: SentenceTransformer, collection_name: str = settings.COLLECTION_NAME, path: str = settings.CSV_PATH):
     texts = pd.read_csv(path, header=None)[0].astype(str).tolist()
-    texts = texts[0:50]
+    texts = texts[0:50] #limit for faster testing
     embeddings = model.encode(texts, normalize_embeddings=True)
     client.upsert(
     collection_name=collection_name,
@@ -41,13 +41,13 @@ def insert_data_from_csv(client: QdrantClient, model: SentenceTransformer, colle
     ]
     )
     
-def search(client: QdrantClient, query: str, model: SentenceTransformer, collection_name: str = settings.COLLECTION_NAME):
+def search(client: QdrantClient, query: str, model: SentenceTransformer, top_k: int,  collection_name: str = settings.COLLECTION_NAME):
     vquery = model.encode(query, normalize_embeddings=True)
     search_result = client.query_points(
         collection_name=collection_name,
         query=vquery,
         with_payload=True,
-        limit=5
+        limit=top_k
     ).points
     results = [
         {"id": str(r.id), "score": float(r.score), "payload": r.payload}

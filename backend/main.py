@@ -2,6 +2,7 @@ from fastapi import FastAPI, Request, HTTPException
 from contextlib import asynccontextmanager
 from .search_engine import init_qdrant_client, init_model, initialize_collection, search, insert_data_from_csv
 from .config import settings
+from .schemas import SearchResponse, SearchRequest, SearchHit
 
 
 @asynccontextmanager
@@ -41,22 +42,22 @@ def healthz():
         "csv_loaded": bool(settings.CSV_PATH),
     }
 
-# @app.post("/search", response_model=SearchResponse)
-# def search_endpoint(req: SearchRequest, request: Request):
-#     if not req.query.strip():
-#         raise HTTPException(status_code=400, detail="Empty query")
+@app.post("/search", response_model=SearchResponse)
+def search_endpoint(req: SearchRequest, request: Request):
+    if not req.query.strip():
+        raise HTTPException(status_code=400, detail="Empty query")
 
-#     qdrant = request.app.state.qdrant
-#     model = request.app.state.model
+    qdrant = request.app.state.qdrant
+    model = request.app.state.model
 
-#     results, took_ms = search(
-#         client=qdrant,
-#         model=model,
-#         collection=settings.QDRANT_COLLECTION,
-#         query=req.query,
-#         top_k=req.top_k,
-#     )
+    results = search(
+        client = qdrant,
+        query = req.query,
+        model = model,
+        top_k=req.top_k,
+        collection_name = settings.COLLECTION_NAME
+    )
 
-#     hits = [SearchHit(id=r["id"], score=r["score"], payload=r["payload"]) for r in results]
-#     return SearchResponse(query=req.query, results=hits, took_ms=took_ms)
+    hits = [SearchHit(id=r["id"], score=r["score"], payload=r["payload"]) for r in results]
+    return SearchResponse(query=req.query, results=hits)
 
