@@ -1,9 +1,11 @@
 import os
+from typing import Optional
 from qdrant_client import QdrantClient
 from qdrant_client.models import Distance, VectorParams, PointStruct
 import pandas as pd
 from sentence_transformers import SentenceTransformer
 from .config import settings
+import uuid
 
 
 def init_qdrant_client() -> QdrantClient:
@@ -55,8 +57,19 @@ def search(client: QdrantClient, query: str, model: SentenceTransformer, top_k: 
     ] 
     return results
     
-def insert_doc(client :QdrantClient, model: SentenceTransformer, text: str, collection_name: str = settings.COLLECTION_NAME):
-    pass
+# def insert_doc(client :QdrantClient, model: SentenceTransformer, text: str, id: Optional[int | str] = None, collection_name: str = settings.COLLECTION_NAME):
+#     if id == None:
+#         id = str(uuid.uuid5(uuid.NAMESPACE_DNS, text))
+#     embedding = model.encode(text, normalize_embeddings=True)
+#     client.upsert(
+#     collection_name = collection_name,
+#     points=
+#         PointStruct(
+#                 id = id,
+#                 vector = embedding,
+#                 payload = {"review": text}
+#         )
+#     )
 
 
 
