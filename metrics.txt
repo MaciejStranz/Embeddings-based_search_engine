@@ -1,5 +1,5 @@
 === CoSQA Evaluation (split=test, k=10) ===
 queries_evaluated: 500
 Recall@10: 0.6640
-MRR@10: 0.4058
-nDCG@10: 0.4684
+MRR@10: 0.4085
+nDCG@10: 0.4703

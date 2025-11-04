@@ -26,9 +26,12 @@ def _dcg_at_k(binary_rels: List[int], k: int = 10) -> float:
 def ndcg_at_k(retrieved: List[str], relevant: Set[str], k: int = 10) -> float:
     rels = [1 if d in relevant else 0 for d in retrieved[:k]]
     dcg = _dcg_at_k(rels, k)
-    ideal_rels = sorted(rels, reverse=True)
+
+    ideal_ones = min(k, len(relevant))
+    ideal_rels = [1] * ideal_ones + [0] * (k - ideal_ones)
     idcg = _dcg_at_k(ideal_rels, k)
     return (dcg / idcg) if idcg > 0 else 0.0
+
 
 def aggregate_at_k(all_retrieved: Dict[str, List[str]], qrels: Dict[str, Set[str]], k: int = 10):
     recalls, rrs, ndcgs = [], [], []
@@ -36,7 +39,7 @@ def aggregate_at_k(all_retrieved: Dict[str, List[str]], qrels: Dict[str, Set[str
     for qid, retrieved in all_retrieved.items():
         relevant = qrels.get(qid, set())
         if not relevant:
-            continue  # pomijamy query bez relewantnych dokumentów
+            continue  
         recalls.append(recall_at_k(retrieved, relevant, k))
         rrs.append(rr_at_k(retrieved, relevant, k))
         ndcgs.append(ndcg_at_k(retrieved, relevant, k))
