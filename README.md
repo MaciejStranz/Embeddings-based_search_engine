@@ -140,8 +140,7 @@ During training:
 
 After training, evaluate again with:
 ```bash
-export MODEL_NAME=models/cosqa-ft-trainer/final
-python run_eval.py
+python run_eval.py --model=models/cosqa-ft-trainer/final --collection=cosqa_new_collection
 ```
 
 Metrics calculated with fine-tuned model and CoSQA dataset:
