@@ -17,12 +17,9 @@ The system indexes code snippets and natural-language queries as embeddings, ret
 - [Overview](#overview)
 - [Installation](#installation)
 - [Running Qdrant](#running-qdrant)
-- [Configuration](#configuration)
 - [Part 1 — Search Engine API](#part-1--search-engine-api)
 - [Part 2 — Evaluation on CoSQA](#part-2--evaluation-on-cosqa)
 - [Part 3 — Fine-tuning](#part-3--fine-tuning)
-- [Reproducibility](#reproducibility)
-- [Troubleshooting](#troubleshooting)
 - [License](#license)
 
 ---
@@ -66,16 +63,6 @@ You can run Qdrant with provided docker-compose file
 ```bash
 docker compose up -d
 ```
-## 🔧 Configuration
-
-| Variable | Description | Default |
-|-----------|-------------|----------|
-| `MODEL_NAME` | Base or fine-tuned SentenceTransformer model | `sentence-transformers/all-MiniLM-L6-v2` |
-| `QDRANT_HOST` | Qdrant host address | `localhost` |
-| `QDRANT_PORT` | Qdrant API port | `6333` |
-| `COLLECTION_NAME` | Default collection name | `docs` |
-
----
 ## 🧰 Part 1 — Search Engine API
 
 ### Run FastAPI
@@ -179,7 +166,7 @@ python plot_loss.py
 
 Result:
 ![Training and Evaluation Loss](loss_curve.png)
-- The figure shows how the loss decreases with each training step.
+- The figure shows how the loss decreases with each training step. The fact that the loss function values continued to decrease in the final steps means that further fine-tuning of the model would likely have resulted in even better improvement in the metrics.
 - The plot is automatically displayed and saved as:
   ```
   loss_curve.png
