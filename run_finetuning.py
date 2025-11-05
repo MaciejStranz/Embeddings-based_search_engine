@@ -5,10 +5,10 @@ if __name__ == "__main__":
         base_model_name="sentence-transformers/all-MiniLM-L6-v2",
         output_dir="models2/cosqa-ft-trainer",
         train_split="train",
-        eval_split="valid",           # możesz dać "valid", by logować eval loss co logging_steps
-        max_train_samples=10000,   # na szybkie demo; usuń limit dla pełnego treningu - bylo 20 000
+        eval_split="valid",           
+        max_train_samples=10000,   
         max_eval_samples=None,
-        num_train_epochs=1, #2
+        num_train_epochs=1, 
         per_device_train_batch_size=64,
         per_device_eval_batch_size=64,
         learning_rate=2e-5,
@@ -23,7 +23,4 @@ if __name__ == "__main__":
 
     print(f"[OK] Output dir:      {out_dir}")
     print(f"[OK] Final model dir: {final_dir}")
-    print()
-    print("Aby użyć modelu w evalu (Part 2):")
-    print(f"  1) Ustaw MODEL_NAME={final_dir}")
-    print("  2) Uruchom: python -m backend.run_eval")
+

@@ -3,22 +3,18 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import os
 
-# === CONFIG ===
 STATE_PATH = "models2/cosqa-ft-trainer/checkpoint-141/trainer_state.json"   # path to file with final logs
-OUTPUT_FIG = "loss_curve.png"       # gdzie zapisać wykres
+OUTPUT_FIG = "loss_curve.png"     
 
 def main():
     if not os.path.exists(STATE_PATH):
         raise FileNotFoundError(f"File not found: {STATE_PATH}")
 
-    # Wczytaj plik trainer_state.json
     with open(STATE_PATH, "r", encoding="utf-8") as f:
         state = json.load(f)
 
-    # Przekształć logi do DataFrame
     log_history = pd.DataFrame(state.get("log_history", []))
 
-    # Wybierz tylko te kroki, gdzie istnieje loss lub eval_loss
     train_loss = log_history[["step", "loss"]].dropna()
     eval_loss = log_history[["step", "eval_loss"]].dropna()
 
@@ -26,7 +22,6 @@ def main():
         print("No loss data found in trainer_state.json")
         return
 
-    # Rysowanie wykresu
     plt.figure(figsize=(10, 6))
     if not train_loss.empty:
         plt.plot(train_loss["step"], train_loss["loss"], label="Train Loss", marker="o")
@@ -40,7 +35,6 @@ def main():
     plt.grid(True)
     plt.tight_layout()
 
-    # Zapisz i pokaż wykres
     plt.savefig(OUTPUT_FIG)
     print(f"Saved plot to {OUTPUT_FIG}")
     plt.show()
