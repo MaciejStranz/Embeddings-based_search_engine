@@ -23,7 +23,6 @@ if __name__ == "__main__":
 
     print(f"[OK] Output dir:      {out_dir}")
     print(f"[OK] Final model dir: {final_dir}")
-    print(f"[OK] Log state json:  {log_json}")
     print()
     print("Aby użyć modelu w evalu (Part 2):")
     print(f"  1) Ustaw MODEL_NAME={final_dir}")

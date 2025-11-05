@@ -80,11 +80,12 @@ docker compose up -d
 
 ### Run FastAPI
 ```bash
-uvicorn backend.app.main:app --host 0.0.0.0 --port 8000 
+uvicorn backend.main:app --port 8000
 ```
 
 When the application starts:
-- **Qdrant automatically loads a small movie reviews dataset** as an initial collection for demonstration purposes.  
+- **Qdrant automatically loads a small movie reviews dataset** as an initial collection for demonstration purposes. 
+- You can provide a description of a film, and most relevant opinions will be returned. 
 - The API becomes available immediately and can be tested via **Swagger UI**, which FastAPI provides by default.
 
 ### 🧪 Testing the API with Swagger UI
