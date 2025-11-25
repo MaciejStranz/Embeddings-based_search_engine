@@ -20,7 +20,6 @@ The system indexes code snippets and natural-language queries as embeddings, ret
 - [Part 1 — Search Engine API](#part-1--search-engine-api)
 - [Part 2 — Evaluation on CoSQA](#part-2--evaluation-on-cosqa)
 - [Part 3 — Fine-tuning](#part-3--fine-tuning)
-- [License](#license)
 
 ---
 
@@ -172,10 +171,3 @@ Result:
   loss_curve.png
   ```
 
----
-
-📜 License
-This project is released under the MIT License.
-
-Author: Maciej Stranz
-Date: November 2025
